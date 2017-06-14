@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">TestSkyEpubLib</string>
+    <string name="searchhint">Type Words To Search</string>
+    <string name="delete">Delete</string>
+    <string name="chara">A</string>
+    <string name="cancel">Cancel</string>
+    <string name="contents">contents</string>
+    <string name="bookmark">bookmark</string>
+    <string name="highlight">highlight</string>
+    <string name="note">Note</string>
+    <string name="searchmore">Search More</string>
+    <string name="searchfinished">Search Finished</string>
+    <string name="searchfound">found</string>
+</resources>
