@@ -6,9 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -16,7 +19,10 @@ import com.skytree.epub.BookInformation;
 
 public class MainActivity extends AppCompatActivity {
     final String RELOADBOOK_ACTION = "com.skytree.android.intent.action.RELOADBOOK";
-    private Button mBtnLoad, mBtnRead;
+    final String PROGRESS_ACTION = "com.skytree.android.intent.action.PROGRESS";
+    final String RELOAD_ACTION = "com.skytree.android.intent.action.RELOAD";
+
+    private Button mBtnLoad, mBtnRead, mBtnLoadInternet;
     private LocalService ls = null;
     boolean isBound = false;
     MyApplication app;
@@ -37,6 +43,12 @@ public class MainActivity extends AppCompatActivity {
             isBound = false;
         }
     };
+
+    public void debug(String msg) {
+//		if (Setting.isDebug()) {
+        Log.w("EPub", msg);
+//		}
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +76,21 @@ public class MainActivity extends AppCompatActivity {
                 openBookViewer(bi);
             }
         });
+
+        mBtnLoadInternet = (Button) findViewById(R.id.btn_internet);
+        mBtnLoadInternet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoadInternetBook();
+            }
+        });
+    }
+
+    private void LoadInternetBook() {
+        if (ls != null) {
+//            ls.startDownload("http://192.168.99.151:8080/test/Alice.epub", null, null, null);
+            ls.startDownload("http://scs.skyepub.net/samples/Alice.epub", "", "", "");
+        }
     }
 
     private void openBookViewer(BookInformation bi) {
@@ -134,11 +161,42 @@ public class MainActivity extends AppCompatActivity {
     public class SkyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(RELOADBOOK_ACTION)) {
-                int bookCode = intent.getIntExtra("BOOKCODE", -1);
+            if (intent.getAction().equals(PROGRESS_ACTION)) {
+                int bookCode = intent.getIntExtra("BOOKCODE",-1);
+                int bytes_downloaded = intent.getIntExtra("BYTES_DOWNLOADED",-1);
+                int bytes_total = intent.getIntExtra("BYTES_TOTAL",-1);
+                double percent = intent.getDoubleExtra("PERCENT",0);
+//	        	debug("Receiver BookCode:"+bookCode+" "+percent);
+                Message msg = new Message();
+                Bundle b = new Bundle();
+                b.putInt("BOOKCODE", bookCode);
+                b.putInt("BYTES_DOWNLOADED", bytes_downloaded);
+                b.putInt("BYTES_TOTAL", bytes_total);
+                b.putDouble("PERCENT", percent);
+                msg.setData(b);
+                new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        int bookCode = msg.getData().getInt("BOOKCODE");
+                        int bytes_downloaded = msg.getData().getInt("BYTES_DOWNLOADED");
+                        int bytes_total = msg.getData().getInt("BYTES_TOTAL");
+                        double percent = msg.getData().getDouble("PERCENT");
+//                        refreshPieView(bookCode,percent);
+                    }
+                }.sendMessage(msg);
+            }else if  (intent.getAction().equals(RELOAD_ACTION)) {
+                debug("Reload Requested");
+                reload();
+            }else if (intent.getAction().equals(RELOADBOOK_ACTION)) {
+                int bookCode = intent.getIntExtra("BOOKCODE",-1);
                 reload(bookCode);
             }
         }
+    }
+
+    public void reload() {
+        app.reloadBookInformations();
+        mBtnRead.setEnabled(true);
     }
 
     public void reload(int bookCode) {

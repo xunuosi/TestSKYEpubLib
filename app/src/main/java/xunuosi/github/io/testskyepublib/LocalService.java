@@ -1,10 +1,21 @@
 package xunuosi.github.io.testskyepublib;
 
+import android.app.DownloadManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -18,13 +29,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.skytree.epub.BookInformation.getBitmapFromURL;
 
 /**
  * Created by xns on 2017/6/12.
  *
  */
 
-public class LocalService extends Service {
+public class
+LocalService extends Service {
     private MyApplication app;
     private final IBinder mBinder = new LocalBinder();
 
@@ -42,6 +58,32 @@ public class LocalService extends Service {
     public void onCreate() {
         super.onCreate();
         app = (MyApplication) getApplication();
+        IntentFilter completeFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        registerReceiver(completeReceiver, completeFilter);
+        checkDownloads();
+    }
+
+    public void checkDownloads() {
+        for (int i = 0; i < app.bis.size(); i++) {
+            BookInformation bi = app.bis.get(i);
+            if (!bi.isDownloaded) {
+                this.deleteBookByBookCode(bi.bookCode);
+                this.deleteFileByDownloadId(bi.res0);
+//				this.deleteFileFromDownloads(bi.bookCode);
+//				this.resumeDownload(bi);
+            }
+        }
+        reloadBookInformations();
+    }
+
+    public void deleteFileByDownloadId(long downloadId) {
+        final DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+        downloadManager.remove(downloadId);
+    }
+
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int i = super.onStartCommand(intent, flags, startId);
+        return i;
     }
 
     @Nullable
@@ -158,5 +200,343 @@ public class LocalService extends Service {
         intent.putExtra("BOOKCODE", bookCode);
 
         this.sendBroadcast(intent);
+    }
+
+    // called after downloading is finished.
+    private BroadcastReceiver completeReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+            long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(downloadId);
+            Cursor c = downloadManager.query(query);
+            if (c==null) return;
+            if (c.moveToFirst()) {
+                int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
+                    String sourceString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_URI));
+                    String localFile = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+                    String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                    String sourceFile = localFile;
+                    String title = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
+                    int bytes_downloaded = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                    int bytes_total = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                    int bookCode = app.sd.getBookCodeByFileName(title);
+
+                    postDownload(bookCode, bytes_total, sourceFile);
+                }
+            }
+        }
+    };
+
+    public void postDownload(int bookCode,int fileSize,String sourceFile) {
+        BookInformation bi = new BookInformation();
+        bi.bookCode = bookCode;
+        bi.fileSize = fileSize;
+        bi.downSize = fileSize;
+        bi.isDownloaded = false;
+        app.sd.updateBook(bi);
+        String destFolder = new String(SkySetting.getStorageDirectory() + "/books");
+        File df = new File(destFolder);
+        df.mkdir();
+        String fileName = app.sd.getFileNameByBookCode(bookCode);
+        String targetFile = destFolder+"/"+app.sd.getFileNameByBookCode(bookCode);
+        SkyUtility.moveFile(sourceFile,targetFile);
+        String coverPath = app.sd.getCoverPathByBookCode(bookCode);
+        String baseDirectory = SkySetting.getStorageDirectory() + "/books";
+        sendProgress(bookCode,0,0,0.9f);
+
+        bi = getBookInformation(fileName,baseDirectory,coverPath);
+
+        bi.bookCode = bookCode;
+        bi.fileSize = -1;
+        bi.downSize = -1;
+        bi.isDownloaded = true;
+        final BookInformation tbi = bi;
+        app.sd.updateBook(bi);
+        (new Handler()).postDelayed(new Runnable() {
+            public void run() {
+                reloadBookInformation(tbi.bookCode);
+            }
+        },500);
+    }
+
+    public void startDownload(String url,String coverUrl,String title,String author){
+        int bookCode = -1;
+        try {
+            bookCode = getBookCodeByURL(url);
+            if (bookCode!=-1){
+                if (this.isBookDownloaded(bookCode)) {
+                    return;
+                }
+            }
+            bookCode = app.sd.insertEmptyBook(url,coverUrl,title,author,0);
+            String targetName = app.sd.getFileNameByBookCode(bookCode);
+            String targetCover = targetName.replace(".epub", ".jpg");
+            if (!(coverUrl == null || coverUrl.isEmpty())) {
+                donwloadCover(coverUrl, targetCover);
+            }
+            final DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+            DownloadManager.Request request;
+            Uri urlToDownload = Uri.parse(this.fileNameEncode(url));
+            request = new DownloadManager.Request(urlToDownload);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, targetName);
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
+            final long downloadId = downloadManager.enqueue(request);
+            request.setTitle(targetName);
+            Timer downloadTimer = new Timer();
+            //delay为long,period为long：从现在起过delay毫秒以后，每隔period毫秒执行一次。
+            downloadTimer.schedule(new DownloadTask(bookCode,downloadId),0,100);
+            reloadBookInformations();
+        }catch(Exception e) {
+            deleteBook(bookCode);
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteBook(int bookCode) {
+        this.deleteBookByBookCode(bookCode);
+        this.reloadBookInformations();
+    }
+
+    public void deleteBookByBookCode(int bookCode) {
+        String targetName = app.sd.getFileNameByBookCode(bookCode);
+        String filePath = new String(SkySetting.getStorageDirectory() + "/books/"+targetName);
+        String targetDir = SkyUtility.removeExtention(filePath);
+        String coverPath = app.sd.getCoverPathByBookCode(bookCode);
+        coverPath.replace(".epub",".jpg");
+        app.sd.deleteRecursive(new File(targetDir));
+        filePath = new String(SkySetting.getStorageDirectory() + "/downloads/"+targetName);
+        app.sd.deleteRecursive(new File(filePath));
+        app.sd.deleteRecursive(new File(coverPath));
+        app.sd.deleteBookByBookCode(bookCode);
+        app.sd.deleteBookmarksByBookCode(bookCode);
+        app.sd.deleteHighlightsByBookCode(bookCode);
+        app.sd.deletePagingsByBookCode(bookCode);
+    }
+
+    public int getBookCodeByURL(String url) {
+        for (int i=0; i<app.bis.size(); i++) {
+            BookInformation bi = app.bis.get(i);
+            if (bi.url.equalsIgnoreCase(url)) return bi.bookCode;
+            if (bi.url.contains(url)) return bi.bookCode;
+            if (url.contains(bi.url)) return bi.bookCode;
+        }
+        return -1;
+    }
+
+    public boolean isBookDownloaded(int bookCode) {
+        for (int i=0; i<app.bis.size(); i++) {
+            BookInformation bi = app.bis.get(i);
+            if (bi.bookCode==bookCode) {
+                return bi.isDownloaded;
+            }
+        }
+        return false;
+    }
+
+    public void reloadBookInformations() {
+        app.reloadBookInformations();
+        this.sendReload();
+    }
+
+    public void sendReload() {
+        final String RELOAD_INTENT = "com.skytree.android.intent.action.RELOAD";
+        Intent intent = new Intent(RELOAD_INTENT);
+        this.sendBroadcast(intent);
+    }
+
+    public void donwloadCover(String url,String fileName) {
+        try {
+            String targetFile = new String(SkySetting.getStorageDirectory() + "/books/"+fileName);
+            new DownloadCoverTask().execute(this.fileNameEncode(url),targetFile);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class DownloadCoverTask extends AsyncTask<String,Void,Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                String url = params[0];
+                String fileName = params[1];
+                Bitmap bmp = getBitmapFromURL(url);
+                FileOutputStream out = new FileOutputStream(fileName);
+                bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+                out.close();
+                bmp.recycle();
+            }catch (Exception e) {
+                e.printStackTrace();
+//				Log.e("donwloadCover error: ", e.getMessage().toString());
+            }
+            return null;
+        }
+    }
+
+    String fileNameEncode(String str) {
+        String es = str.replace(" ", "%20");
+        return es;
+    }
+
+    class DownloadTask extends TimerTask {
+        int bookCode = -1;
+        long downloadId = -1;
+        DownloadTask(int bookCode,long downloadId) {
+            this.bookCode = bookCode;
+            this.downloadId = downloadId;
+        }
+
+        Handler cancelHandler = new Handler(){
+            public void handleMessage(Message m){
+                deleteBook(bookCode);
+                reloadBookInformations();
+            }
+        };
+
+        @Override
+        public void run() {
+            DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+            DownloadManager.Query q = new DownloadManager.Query();
+            q.setFilterById(downloadId);
+            Cursor cursor = downloadManager.query(q);
+            cursor.moveToFirst();
+            boolean ret = checkStatus(cursor);
+            if (ret==false) {
+                cancel();
+                Message msg = new Message();
+                cancelHandler.sendMessage(msg);
+            }
+            int bytes_downloaded = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+            int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+            debug("total "+bytes_total);
+            cursor.close();
+            double dl_progress = (double)((double)bytes_downloaded / (double)bytes_total);
+            double percent = dl_progress;
+
+            if (bytes_total>0) {
+                Message msg = new Message();
+                Bundle b = new Bundle();
+                b.putInt("BOOKCODE", bookCode);
+                b.putInt("BYTES_DOWNLOADED", bytes_downloaded);
+                b.putInt("BYTES_TOTAL", bytes_total);
+                b.putDouble("PERCENT", percent);
+                msg.setData(b);
+                progressHandler.sendMessage(msg);
+            }
+            if (isBookDownloaded(bookCode)) {
+                downloadManager.remove(downloadId);
+                debug("download finished successfully for BookCode:"+bookCode);
+                cancel();
+            }
+        }
+
+        private final Handler progressHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                int bookCode = msg.getData().getInt("BOOKCODE");
+                int bytes_downloaded = msg.getData().getInt("BYTES_DOWNLOADED");
+                int bytes_total = msg.getData().getInt("BYTES_TOTAL");
+                double percent = msg.getData().getDouble("PERCENT");
+                sendProgress(bookCode,bytes_downloaded,bytes_total,percent);
+            }
+        };
+    }
+
+    public void sendProgress(int bookCode,int bytes_downloaded, int bytes_total,double percent) {
+        BookInformation bi = new BookInformation();
+        bi.bookCode = bookCode;
+        bi.fileSize = bytes_total;
+        bi.downSize = bytes_downloaded;
+        app.sd.updateDownloadProcess(bi);
+
+        final String PROGRESS_INTENT = "com.skytree.android.intent.action.PROGRESS";
+        Intent intent = new Intent(PROGRESS_INTENT);
+        intent.putExtra("BOOKCODE", bookCode);
+        intent.putExtra("BYTES_DONWLOADED", bytes_downloaded);
+        intent.putExtra("BYTES_TOTAL", bytes_total);
+        intent.putExtra("PERCENT", percent);
+
+//		debug("Sender   BookCode:"+bookCode+" "+percent);
+        this.sendBroadcast(intent);
+    }
+
+    private boolean checkStatus(Cursor cursor){
+        boolean ret = true;
+        //column for status
+        int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+        int status = cursor.getInt(columnIndex);
+        //column for reason code if the download failed or paused
+        int columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
+        int reason = cursor.getInt(columnReason);
+
+        String statusText = "";
+        String reasonText = "";
+
+        switch(status){
+            case DownloadManager.STATUS_FAILED:
+                ret = false;
+                statusText = "STATUS_FAILED";
+                switch(reason){
+                    case DownloadManager.ERROR_CANNOT_RESUME:
+                        reasonText = "ERROR_CANNOT_RESUME";
+                        break;
+                    case DownloadManager.ERROR_DEVICE_NOT_FOUND:
+                        reasonText = "ERROR_DEVICE_NOT_FOUND";
+                        break;
+                    case DownloadManager.ERROR_FILE_ALREADY_EXISTS:
+                        reasonText = "ERROR_FILE_ALREADY_EXISTS";
+                        break;
+                    case DownloadManager.ERROR_FILE_ERROR:
+                        reasonText = "ERROR_FILE_ERROR";
+                        break;
+                    case DownloadManager.ERROR_HTTP_DATA_ERROR:
+                        reasonText = "ERROR_HTTP_DATA_ERROR";
+                        break;
+                    case DownloadManager.ERROR_INSUFFICIENT_SPACE:
+                        reasonText = "ERROR_INSUFFICIENT_SPACE";
+                        break;
+                    case DownloadManager.ERROR_TOO_MANY_REDIRECTS:
+                        reasonText = "ERROR_TOO_MANY_REDIRECTS";
+                        break;
+                    case DownloadManager.ERROR_UNHANDLED_HTTP_CODE:
+                        reasonText = "ERROR_UNHANDLED_HTTP_CODE";
+                        break;
+                    case DownloadManager.ERROR_UNKNOWN:
+                        reasonText = "ERROR_UNKNOWN";
+                        break;
+                }
+                break;
+            case DownloadManager.STATUS_PAUSED:
+                statusText = "STATUS_PAUSED";
+                switch(reason){
+                    case DownloadManager.PAUSED_QUEUED_FOR_WIFI:
+                        reasonText = "PAUSED_QUEUED_FOR_WIFI";
+                        break;
+                    case DownloadManager.PAUSED_UNKNOWN:
+                        reasonText = "PAUSED_UNKNOWN";
+                        break;
+                    case DownloadManager.PAUSED_WAITING_FOR_NETWORK:
+                        reasonText = "PAUSED_WAITING_FOR_NETWORK";
+                        break;
+                    case DownloadManager.PAUSED_WAITING_TO_RETRY:
+                        reasonText = "PAUSED_WAITING_TO_RETRY";
+                        break;
+                }
+                break;
+            case DownloadManager.STATUS_PENDING:
+                statusText = "STATUS_PENDING";
+                break;
+            case DownloadManager.STATUS_RUNNING:
+                statusText = "STATUS_RUNNING";
+                break;
+            case DownloadManager.STATUS_SUCCESSFUL:
+                statusText = "STATUS_SUCCESSFUL";
+                break;
+        }
+
+//		debug(statusText+"  "+reasonText);
+        return ret;
     }
 }
