@@ -34,7 +34,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.text.TextUtils.TruncateAt;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -97,8 +96,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-
-import xunuosi.github.io.testskyepublib.presenter.BookViewPresenter;
 import xunuosi.github.io.testskyepublib.view.IBookView;
 import xunuosi.github.io.testskyepublib.widget.DottedDrawable;
 import xunuosi.github.io.testskyepublib.widget.LineDrawable;
@@ -106,7 +103,7 @@ import xunuosi.github.io.testskyepublib.widget.SkyBox;
 import xunuosi.github.io.testskyepublib.widget.SkySeekBar;
 import xunuosi.github.io.testskyepublib.widget.Theme;
 
-public class BookViewActivity extends Activity implements IBookView {
+public class MyBookViewActivity extends Activity implements IBookView {
 	ReflowableControl rv;
 	RelativeLayout ePubView;
 
@@ -162,7 +159,7 @@ public class BookViewActivity extends Activity implements IBookView {
 	String fontNames[] = {"Book Fonts", "Sans Serif", "Serif", "Monospace"};
 	LinearLayout fontListView;
 
-	SkyLayout listBox;
+	MySkyLayout listBox;
 	Button contentListButton;
 	Button bookmarkListButton;
 	Button highlightListButton;
@@ -170,7 +167,7 @@ public class BookViewActivity extends Activity implements IBookView {
 	LinearLayout listView;
 	Button listTopButton;
 
-	SkyLayout mediaBox;
+	MySkyLayout mediaBox;
 	ImageButton playAndPauseButton;
 	ImageButton stopButton;
 	ImageButton prevButton;
@@ -1116,8 +1113,8 @@ public class BookViewActivity extends Activity implements IBookView {
 		ePubView = new RelativeLayout(this);
 
 		RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.FILL_PARENT,
-				RelativeLayout.LayoutParams.FILL_PARENT);
+				LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT);
 		ePubView.setLayoutParams(rlp);
 
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
@@ -1452,25 +1449,25 @@ public class BookViewActivity extends Activity implements IBookView {
 
 	public void makeBoxes() {
 		this.removeBoxes();
-		this.makeOutsideButton();
-		this.makeSeekBox();
-		this.makeMenuBox();
-		this.makeHighlightBox();
-		this.makeColorBox();
-		this.makeNoteBox();
-		this.makeSearchBox();
-		this.makeFontBox();
-		this.makeListBox();
-		this.makeMediaBox();
-		this.makePagingView();
-	}
+        this.makeOutsideButton();
+        this.makeSeekBox();
+        this.makeMenuBox();
+        this.makeHighlightBox();
+        this.makeColorBox();
+        this.makeNoteBox();
+        this.makeSearchBox();
+        this.makeFontBox();
+        this.makeListBox();
+        this.makeMediaBox();
+        this.makePagingView();
+    }
 
 	public void makeOutsideButton() {
 		outsideButton = new Button(this);
-		outsideButton.setId(9999);
+        Log.e("xns", "outBtn:" + outsideButton.toString());
+        outsideButton.setId(9999);
 		outsideButton.setBackgroundColor(Color.TRANSPARENT);
-		outsideButton.setOnClickListener(listener);
-//		rv.customView.addView(outsideButton);
+        outsideButton.setOnClickListener(listener);
 		ePubView.addView(outsideButton);
 		hideOutsideButton();
 	}
@@ -1609,10 +1606,15 @@ public class BookViewActivity extends Activity implements IBookView {
 		highlightBox.setArrowDirection(false);
 
 		int bs = ps(38);
-		colorButtonInHighlightBox = this.makeImageButton(6002, R.drawable.colorchooser2x, bs, bs);
-		trashButtonInHighlightBox = this.makeImageButton(6003, R.drawable.trash2x, bs, bs);
-		noteButtonInHighlightBox = this.makeImageButton(6004, R.drawable.memo2x, bs, bs);
-		shareButtonInHighlightBox = this.makeImageButton(6005, R.drawable.save2x, bs, bs);
+//		colorButtonInHighlightBox = this.makeImageButton(6002, R.drawable.colorchooser2x, bs, bs);
+//		trashButtonInHighlightBox = this.makeImageButton(6003, R.drawable.trash2x, bs, bs);
+//		noteButtonInHighlightBox = this.makeImageButton(6004, R.drawable.memo2x, bs, bs);
+//		shareButtonInHighlightBox = this.makeImageButton(6005, R.drawable.save2x, bs, bs);
+
+        colorButtonInHighlightBox = this.makeImageButton(R.id.highlight_box_color, R.drawable.colorchooser2x, bs, bs);
+		trashButtonInHighlightBox = this.makeImageButton(R.id.highlight_box_trash, R.drawable.trash2x, bs, bs);
+		noteButtonInHighlightBox = this.makeImageButton(R.id.highlight_box_note, R.drawable.memo2x, bs, bs);
+		shareButtonInHighlightBox = this.makeImageButton(R.id.highlight_box_share, R.drawable.save2x, bs, bs);
 
 		int ds = 60;
 		this.setLocation(colorButtonInHighlightBox, ps(10) + ps(ds) * 0, ps(4));
@@ -1631,15 +1633,15 @@ public class BookViewActivity extends Activity implements IBookView {
 	}
 
 	public void showHighlightBox() {
-		this.showOutsideButton();
-		this.setFrame(highlightBox, boxFrame.left, boxFrame.top, boxFrame.width(), boxFrame.height());
-		highlightBox.setArrowDirection(menuBox.isArrowDown);
-		highlightBox.arrowPosition = menuBox.arrowPosition;
-		highlightBox.arrowHeight = menuBox.arrowHeight;
-		highlightBox.boxColor = currentColor;
-		highlightBox.setVisibility(View.VISIBLE);
-		isBoxesShown = true;
-	}
+        this.showOutsideButton();
+        this.setFrame(highlightBox, boxFrame.left, boxFrame.top, boxFrame.width(), boxFrame.height());
+        highlightBox.setArrowDirection(menuBox.isArrowDown);
+        highlightBox.arrowPosition = menuBox.arrowPosition;
+        highlightBox.arrowHeight = menuBox.arrowHeight;
+        highlightBox.boxColor = currentColor;
+        highlightBox.setVisibility(View.VISIBLE);
+        isBoxesShown = true;
+    }
 
 	public void showHighlightBox(Rect startRect, Rect endRect) {
 		this.showOutsideButton();
@@ -2050,7 +2052,7 @@ public class BookViewActivity extends Activity implements IBookView {
 		int headColor = Color.rgb(94, 61, 34);
 		int textColor = Color.rgb(50, 40, 40);
 
-		SkyLayout view = new SkyLayout(this);
+		MySkyLayout view = new MySkyLayout(this);
 		int itemWidth = ps(370);
 		int itemHeight = ps(190);
 
@@ -2143,7 +2145,7 @@ public class BookViewActivity extends Activity implements IBookView {
 		this.setFrame(fontBoxScrollView, ps(5), ps(10), ps(440), ps(height - 50));
 		fontBox.contentView.addView(fontBoxScrollView);    // NEW
 
-		SkyLayout contentLayout = new SkyLayout(this);
+        MySkyLayout contentLayout = new MySkyLayout(this);
 		fontBoxScrollView.addView(contentLayout, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 		// #1 first make brightness controller
@@ -2388,7 +2390,7 @@ public class BookViewActivity extends Activity implements IBookView {
 	}
 
 	public void makeListBox() {
-		this.listBox = new SkyLayout(this);
+		this.listBox = new MySkyLayout(this);
 		listBox.setBackgroundColor(Color.TRANSPARENT);
 //		listBox.setBackgroundColor(this.themes.get(this.themeIndex).backgroundColor | 0xD0000000);
 		listTopButton = new Button(this);
@@ -2563,7 +2565,7 @@ public class BookViewActivity extends Activity implements IBookView {
 			Theme theme = getCurrentTheme();
 			textColor = theme.foregroundColor;
 			PageInformation pi = pis.get(i);
-			SkyLayout item = new SkyLayout(this);
+            MySkyLayout item = new MySkyLayout(this);
 			setFrame(item, 0, 0, listBox.getWidth(), ps(80));
 			ImageButton mark = this.makeImageButton(9898, R.drawable.bookmarked2x, ps(50), ps(90));
 			item.addView(mark);
@@ -2629,7 +2631,7 @@ public class BookViewActivity extends Activity implements IBookView {
 		public void onClick(View arg) {
 			int targetCode = arg.getId();
 			for (int i = 0; i < listView.getChildCount(); i++) {
-				SkyLayout view = (SkyLayout) listView.getChildAt(i);
+                MySkyLayout view = (MySkyLayout) listView.getChildAt(i);
 				if (view.getId() == targetCode) {
 					listView.removeViewAt(i);
 					sd.deleteBookmarkByCode(targetCode);
@@ -2638,13 +2640,13 @@ public class BookViewActivity extends Activity implements IBookView {
 		}
 	};
 
-	private SkyLayoutListener bookmarkListDelegate = new SkyLayoutListener() {
+	private MySkyLayoutListener bookmarkListDelegate = new MySkyLayoutListener() {
 		@Override
-		public void onShortPress(SkyLayout view, MotionEvent e) {
+		public void onShortPress(MySkyLayout view, MotionEvent e) {
 		}
 
 		@Override
-		public void onLongPress(SkyLayout view, MotionEvent e) {
+		public void onLongPress(MySkyLayout view, MotionEvent e) {
 			beep(100);
 			Button deleteButton = (Button) view.deleteControl;
 			int vt = deleteButton.getVisibility();
@@ -2656,7 +2658,7 @@ public class BookViewActivity extends Activity implements IBookView {
 			}
 		}
 
-		void toggleDeleteButton(SkyLayout view) {
+		void toggleDeleteButton(MySkyLayout view) {
 			beep(50);
 			Button deleteButton = (Button) view.deleteControl;
 			if (deleteButton.getVisibility() == View.VISIBLE) {
@@ -2668,19 +2670,19 @@ public class BookViewActivity extends Activity implements IBookView {
 		}
 
 		@Override
-		public void onSwipeToLeft(SkyLayout view) {
+		public void onSwipeToLeft(MySkyLayout view) {
 			toggleDeleteButton(view);
 		}
 
 		@Override
-		public void onSwipeToRight(SkyLayout view) {
+		public void onSwipeToRight(MySkyLayout view) {
 			toggleDeleteButton(view);
 		}
 
 		PageInformation targetPI = null;
 
 		@Override
-		public void onSingleTapUp(SkyLayout view, MotionEvent e) {
+		public void onSingleTapUp(MySkyLayout view, MotionEvent e) {
 			Button deleteButton = (Button) view.deleteControl;
 			int vt = deleteButton.getVisibility();
 			if (vt == View.VISIBLE) return;
@@ -2707,7 +2709,7 @@ public class BookViewActivity extends Activity implements IBookView {
 		Highlights highlights = sd.fetchAllHighlights(this.bookCode);
 		for (int i = 0; i < highlights.getSize(); i++) {
 			Highlight highlight = highlights.getHighlight(i);
-			SkyLayout item = new SkyLayout(this);
+            MySkyLayout item = new MySkyLayout(this);
 			int ci = highlight.chapterIndex;
 			if (rv.isRTL()) {
 				ci = rv.getNumberOfChapters() - ci - 1;
@@ -2786,7 +2788,7 @@ public class BookViewActivity extends Activity implements IBookView {
 		public void onClick(View arg) {
 			int targetCode = arg.getId();
 			for (int i = 0; i < listView.getChildCount(); i++) {
-				SkyLayout view = (SkyLayout) listView.getChildAt(i);
+                MySkyLayout view = (MySkyLayout) listView.getChildAt(i);
 				if (view.getId() == targetCode) {
 					Highlight target = (Highlight) view.data;
 					listView.removeViewAt(i);
@@ -2796,13 +2798,13 @@ public class BookViewActivity extends Activity implements IBookView {
 		}
 	};
 
-	private SkyLayoutListener highlightListDelegate = new SkyLayoutListener() {
+	private MySkyLayoutListener highlightListDelegate = new MySkyLayoutListener() {
 		@Override
-		public void onShortPress(SkyLayout view, MotionEvent e) {
+		public void onShortPress(MySkyLayout view, MotionEvent e) {
 		}
 
 		@Override
-		public void onLongPress(SkyLayout view, MotionEvent e) {
+		public void onLongPress(MySkyLayout view, MotionEvent e) {
 			beep(100);
 			Button deleteButton = (Button) view.deleteControl;
 			int vt = deleteButton.getVisibility();
@@ -2814,7 +2816,7 @@ public class BookViewActivity extends Activity implements IBookView {
 			}
 		}
 
-		void toggleDeleteButton(SkyLayout view) {
+		void toggleDeleteButton(MySkyLayout view) {
 			beep(50);
 			Button deleteButton = (Button) view.deleteControl;
 			if (deleteButton.getVisibility() == View.VISIBLE) {
@@ -2826,19 +2828,19 @@ public class BookViewActivity extends Activity implements IBookView {
 		}
 
 		@Override
-		public void onSwipeToLeft(SkyLayout view) {
+		public void onSwipeToLeft(MySkyLayout view) {
 			toggleDeleteButton(view);
 		}
 
 		@Override
-		public void onSwipeToRight(SkyLayout view) {
+		public void onSwipeToRight(MySkyLayout view) {
 			toggleDeleteButton(view);
 		}
 
 		Highlight targetHighlight = null;
 
 		@Override
-		public void onSingleTapUp(SkyLayout view, MotionEvent e) {
+		public void onSingleTapUp(MySkyLayout view, MotionEvent e) {
 			Button deleteButton = (Button) view.deleteControl;
 			int vt = deleteButton.getVisibility();
 			if (vt == View.VISIBLE) return;
@@ -2865,7 +2867,7 @@ public class BookViewActivity extends Activity implements IBookView {
 	}
 
 	public void makeMediaBox() {
-		mediaBox = new SkyLayout(this);
+		mediaBox = new MySkyLayout(this);
 		setFrame(mediaBox, 30, 200, ps(320), ps(50));
 
 		int bs = ps(32);
@@ -3768,7 +3770,12 @@ public class BookViewActivity extends Activity implements IBookView {
 
 	private OnClickListener listener = new OnClickListener() {
 		public void onClick(View arg) {
-			if (arg.getId() == 8080) {
+            Log.d("xns", "onClickId:" + arg.getId());
+            Log.d("xns", "myId:" + highlightBox.contentView.getChildAt(0).getId());
+            for (int i=0;i<ePubView.getChildCount();i++) {
+                Log.d("xns", "view:" + ePubView.getChildAt(i));
+            }
+            if (arg.getId() == 8080) {
 				playPrev();
 			} else if (arg.getId() == 8081) {
 				playAndPause();
@@ -3814,8 +3821,9 @@ public class BookViewActivity extends Activity implements IBookView {
 				if (!rv.isPaging()) showNoteBox();
 			}
 
-			if (arg.getId() == 6002) {
-				// Color Chooser
+			if (arg.getId() == R.id.highlight_box_color) {
+                Log.d("xns", "color");
+                // Color Chooser
 				hideHighlightBox();
 				showColorBox();
 			} else if (arg.getId() == 6003) {
@@ -4432,15 +4440,15 @@ public class BookViewActivity extends Activity implements IBookView {
 	}
 }
 
-interface SkyLayoutListener {
-	void onShortPress(SkyLayout view, MotionEvent e);
-	void onLongPress(SkyLayout view, MotionEvent e);
-	void onSingleTapUp(SkyLayout view, MotionEvent e);
-	void onSwipeToLeft(SkyLayout view);
-	void onSwipeToRight(SkyLayout view);
+interface MySkyLayoutListener {
+	void onShortPress(MySkyLayout view, MotionEvent e);
+	void onLongPress(MySkyLayout view, MotionEvent e);
+	void onSingleTapUp(MySkyLayout view, MotionEvent e);
+	void onSwipeToLeft(MySkyLayout view);
+	void onSwipeToRight(MySkyLayout view);
 }
 
-class SkyLayout extends RelativeLayout implements android.view.GestureDetector.OnGestureListener {
+class MySkyLayout extends RelativeLayout implements android.view.GestureDetector.OnGestureListener {
 	public Object data;
 	public View editControl;
 	public View deleteControl;
@@ -4449,14 +4457,14 @@ class SkyLayout extends RelativeLayout implements android.view.GestureDetector.O
     private static final int SWIPE_MAX_OFF_PATH = 1024;
     private static final int SWIPE_THRESHOLD_VELOCITY = 50;
     
-    private SkyLayoutListener skyLayoutListener = null;
+    private MySkyLayoutListener skyLayoutListener = null;
 	 
-	public SkyLayout(Context context) {
+	public MySkyLayout(Context context) {
 		super(context);		
 		gestureScanner = new GestureDetector(this);
 	}
 	
-	public void setSkyLayoutListener(SkyLayoutListener sl) {
+	public void setSkyLayoutListener(MySkyLayoutListener sl) {
 		this.skyLayoutListener = sl;
 	}
 	

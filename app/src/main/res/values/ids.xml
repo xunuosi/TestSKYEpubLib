@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="highlight_box_color" type="id"/>
+    <item name="highlight_box_trash" type="id"/>
+    <item name="highlight_box_note" type="id"/>
+    <item name="highlight_box_share" type="id"/>
+</resources>

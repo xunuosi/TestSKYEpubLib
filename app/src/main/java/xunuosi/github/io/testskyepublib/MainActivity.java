@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void openBookViewer(BookInformation bi, boolean fromBeginning) {
         Intent intent;
-        intent = new Intent(this, BookViewActivity.class);
+        intent = new Intent(this, MyBookViewActivity.class);
         intent.putExtra("BOOKCODE", bi.bookCode);
         intent.putExtra("TITLE", bi.title);
         intent.putExtra("AUTHOR", bi.creator);
