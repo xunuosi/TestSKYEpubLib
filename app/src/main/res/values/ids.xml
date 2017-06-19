@@ -4,4 +4,35 @@
     <item name="highlight_box_trash" type="id"/>
     <item name="highlight_box_note" type="id"/>
     <item name="highlight_box_share" type="id"/>
+    <item name="font_box_decreaseBtn" type="id"/>
+    <item name="font_box_increaseBtn" type="id"/>
+    <item name="font_box_decreaseLineSpaceBtn" type="id"/>
+    <item name="font_box_increaseLineSpaceBtn" type="id"/>
+    <item name="font_box_brightBar" type="id"/>
+    <item name="highlight_menu_highlight" type="id"/>
+    <item name="highlight_menu_note" type="id"/>
+    <item name="search_box_cancelBtn" type="id"/>
+    <item name="make_controls_seekBar" type="id"/>
+    <item name="make_controls_rotationBtn" type="id"/>
+    <item name="make_controls_listBtn" type="id"/>
+    <item name="make_controls_fontBtn" type="id"/>
+    <item name="make_controls_searchBtn" type="id"/>
+    <item name="btn_outside" type="id"/>
+    <item name="make_resultItem_chapterLabel" type="id"/>
+    <item name="make_resultItem_positionLabel" type="id"/>
+    <item name="make_resultItem_textLabel" type="id"/>
+    <item name="make_resultItem_btn_more" type="id"/>
+    <item name="make_resultItem_btn_finish" type="id"/>
+    <item name="make_listBox_listTopBtn" type="id"/>
+    <item name="make_listBox_contentListBtn" type="id"/>
+    <item name="make_listBox_bookmarkListBtn" type="id"/>
+    <item name="make_listBox_highlightListBtn" type="id"/>
+    <item name="make_MediaBox_prevBtn" type="id"/>
+    <item name="make_MediaBox_playOrPauseBtn" type="id"/>
+    <item name="make_MediaBox_stopBtn" type="id"/>
+    <item name="make_MediaBox_nextBtn" type="id"/>
+    <item name="make_colorBox_yellowBtn" type="id"/>
+    <item name="make_colorBox_greenBtn" type="id"/>
+    <item name="make_colorBox_blueBtn" type="id"/>
+    <item name="make_colorBox_redBtn" type="id"/>
 </resources>

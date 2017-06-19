@@ -277,29 +277,29 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		public boolean onTouch(final View view, final MotionEvent motionEvent) {
 			if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
 				//grey color filter, you can change the color as you like
-				if (button.getId() == 5000) {
+				if (button.getId() == R.id.font_box_decreaseBtn) {
 					button.setTextColor(Color.BLUE);
 					button.setTextSize(16);
-				} else if (button.getId() == 5001) {
+				} else if (button.getId() == R.id.font_box_increaseBtn) {
 					button.setTextColor(Color.BLUE);
 					button.setTextSize(20);
-				} else if (button.getId() == 6000 || button.getId() == 6001) {
+				} else if (button.getId() == R.id.highlight_menu_highlight || button.getId() == R.id.highlight_menu_note) {
 					button.setTextSize(17);
 					button.setTextColor(Color.YELLOW);
-				} else if (button.getId() == 3001) {
+				} else if (button.getId() == R.id.search_box_cancelBtn) {
 					button.setTextColor(Color.BLACK);
 				}
 			} else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-				if (button.getId() == 5000) {
+				if (button.getId() == R.id.font_box_decreaseBtn) {
 					button.setTextColor(Color.BLACK);
 					button.setTextSize(14);
-				} else if (button.getId() == 5001) {
+				} else if (button.getId() == R.id.font_box_increaseBtn) {
 					button.setTextColor(Color.BLACK);
 					button.setTextSize(18);
-				} else if (button.getId() == 6000 || button.getId() == 6001) {
+				} else if (button.getId() == R.id.highlight_menu_highlight || button.getId() == R.id.highlight_menu_note) {
 					button.setTextSize(15);
 					button.setTextColor(Color.WHITE);
-				} else if (button.getId() == 3001) {
+				} else if (button.getId() == R.id.search_box_cancelBtn) {
 					button.setTextColor(Color.DKGRAY);
 				}
 			}
@@ -366,7 +366,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 
         public void onStopTrackingTouch(SeekBar seekBar) {
             int position = seekBar.getProgress();
-            if (seekBar.getId()==999) {
+            if (seekBar.getId()==R.id.make_controls_seekBar) {
                 stopPlaying();
                 if (rv.isGlobalPagination()) {
                     int pib = position;
@@ -381,7 +381,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
         }
 
         public void onStartTrackingTouch(SeekBar seekBar) {
-            if (seekBar.getId()==999) {
+            if (seekBar.getId()==R.id.make_controls_seekBar) {
                 showSeekBox();
             }
         }
@@ -389,7 +389,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             double ppb = 0;
             PageInformation pi = null;
-            if (seekBar.getId()==999) {
+            if (seekBar.getId()==R.id.make_controls_seekBar) {
                 if (rv.isGlobalPagination()) {
                     int pib = progress;
                     ppb = rv.getPagePositionInBookByPageIndexInBook(pib);
@@ -400,7 +400,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
                 }
                 if (pi!=null) moveSeekBox(pi);
             }
-            if (seekBar.getId()==997) {
+            if (seekBar.getId()==R.id.font_box_brightBar) {
                 setting.brightness = (float)progress/(float)999.f;
                 setBrightness((float)setting.brightness);
             }
@@ -502,21 +502,8 @@ public class MyBookViewActivity extends Activity implements IBookView {
 
         public void onHighlightInserted(Highlight highlight) {
             dumpHighlight("onHighlightInserted", highlight);
-//			showToast(highlight.text);
-
-//			Highlight modified = new Highlight();
-//			modified.startIndex = 125;
-//			modified.startOffset = 175;
-//			modified.endIndex = 125; // 125
-//			modified.endOffset =  182;
-//			modified.chapterIndex = highlight.chapterIndex;
-//			modified.code = highlight.code;
-//			modified.color = highlight.color;
-//			modified.bookCode = highlight.bookCode;
-//			sd.insertHighlight(modified);
-
             sd.insertHighlight(highlight);
-            showToast("startIndex " + highlight.startIndex + " startOffset " + highlight.startOffset + " endIndex " + highlight.endIndex + " endOffset " + highlight.endOffset + " text " + highlight.text);
+//            showToast("startIndex " + highlight.startIndex + " startOffset " + highlight.startOffset + " endIndex " + highlight.endIndex + " endOffset " + highlight.endOffset + " text " + highlight.text);
         }
 
         public void onHighlightHit(Highlight highlight, int x, int y, Rect startRect, Rect endRect) {
@@ -675,7 +662,6 @@ public class MyBookViewActivity extends Activity implements IBookView {
                 }
                 if (markIcon != null) {
                     markIcon = changeDrawableColor(markIcon, Color.LTGRAY, theme.controlColor);
-//					markIcon.setColorFilter(makeColorFilter(theme.controlColor));
                     iconBitmap = ((BitmapDrawable) markIcon).getBitmap();
                 }
             } catch (Exception e) {
@@ -1465,7 +1451,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 	public void makeOutsideButton() {
 		outsideButton = new Button(this);
         Log.e("xns", "outBtn:" + outsideButton.toString());
-        outsideButton.setId(9999);
+        outsideButton.setId(R.id.btn_outside);
 		outsideButton.setBackgroundColor(Color.TRANSPARENT);
         outsideButton.setOnClickListener(listener);
 		ePubView.addView(outsideButton);
@@ -1567,7 +1553,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		menuBox.setArrowDirection(false);
 		highlightMenuButton = new Button(this);
 		highlightMenuButton.setText("Highlight");
-		highlightMenuButton.setId(6000);
+		highlightMenuButton.setId(R.id.highlight_menu_highlight);
 		highlightMenuButton.setBackgroundColor(Color.TRANSPARENT);
 		highlightMenuButton.setTextColor(Color.LTGRAY);
 		highlightMenuButton.setTextSize(15);
@@ -1577,7 +1563,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		menuBox.contentView.addView(highlightMenuButton);
 		noteMenuButton = new Button(this);
 		noteMenuButton.setText("Note");
-		noteMenuButton.setId(6001);
+		noteMenuButton.setId(R.id.highlight_menu_note);
 		noteMenuButton.setBackgroundColor(Color.TRANSPARENT);
 		noteMenuButton.setTextColor(Color.LTGRAY);
 		noteMenuButton.setTextSize(15);
@@ -1606,10 +1592,6 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		highlightBox.setArrowDirection(false);
 
 		int bs = ps(38);
-//		colorButtonInHighlightBox = this.makeImageButton(6002, R.drawable.colorchooser2x, bs, bs);
-//		trashButtonInHighlightBox = this.makeImageButton(6003, R.drawable.trash2x, bs, bs);
-//		noteButtonInHighlightBox = this.makeImageButton(6004, R.drawable.memo2x, bs, bs);
-//		shareButtonInHighlightBox = this.makeImageButton(6005, R.drawable.save2x, bs, bs);
 
         colorButtonInHighlightBox = this.makeImageButton(R.id.highlight_box_color, R.drawable.colorchooser2x, bs, bs);
 		trashButtonInHighlightBox = this.makeImageButton(R.id.highlight_box_trash, R.drawable.trash2x, bs, bs);
@@ -1674,10 +1656,10 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		colorBox.setArrowDirection(false);
 
 		int bs = ps(38);
-		ImageButton yellowButton = this.makeImageButton(6010, R.drawable.yellowbox2x, bs, bs);
-		ImageButton greenButton = this.makeImageButton(6011, R.drawable.greenbox2x, bs, bs);
-		ImageButton blueButton = this.makeImageButton(6012, R.drawable.bluebox2x, bs, bs);
-		ImageButton redButton = this.makeImageButton(6013, R.drawable.redbox2x, bs, bs);
+		ImageButton yellowButton = this.makeImageButton(R.id.make_colorBox_yellowBtn, R.drawable.yellowbox2x, bs, bs);
+		ImageButton greenButton = this.makeImageButton(R.id.make_colorBox_greenBtn, R.drawable.greenbox2x, bs, bs);
+		ImageButton blueButton = this.makeImageButton(R.id.make_colorBox_blueBtn, R.drawable.bluebox2x, bs, bs);
+		ImageButton redButton = this.makeImageButton(R.id.make_colorBox_redBtn, R.drawable.redbox2x, bs, bs);
 
 		int ds = 60;
 		int oy = 3;
@@ -1942,7 +1924,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		Button cancelButton = new Button(this);
 		this.setFrame(cancelButton, ps(290), ps(20), ps(90), ps(50));
 		cancelButton.setText(getString(R.string.cancel));
-		cancelButton.setId(3001);
+		cancelButton.setId(R.id.search_box_cancelBtn);
 		RoundRectShape crs = new RoundRectShape(new float[]{ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5)}, null, null);
 		SkyDrawable cd = new SkyDrawable(crs, innerBoxColor, inlineColor, 2);
 		cancelButton.setBackgroundDrawable(cd);
@@ -2078,20 +2060,18 @@ public class MyBookViewActivity extends Activity implements IBookView {
 			if (sr.pageIndex < 0 || sr.numberOfPagesInChapter < 0) {
 				positionText = "";
 			}
-			chapterLabel = this.makeLabel(3090, chapterText, Gravity.LEFT, 15, headColor);
-			positionLabel = this.makeLabel(3091, positionText, Gravity.LEFT, 15, headColor);
-			textLabel = this.makeLabel(3092, sr.text, Gravity.LEFT, 15, textColor);
+			chapterLabel = this.makeLabel(R.id.make_resultItem_chapterLabel, chapterText, Gravity.LEFT, 15, headColor);
+			positionLabel = this.makeLabel(R.id.make_resultItem_positionLabel, positionText, Gravity.LEFT, 15, headColor);
+			textLabel = this.makeLabel(R.id.make_resultItem_textLabel, sr.text, Gravity.LEFT, 15, textColor);
 			itemButton.setId(100000 + searchResults.size());
 		} else if (mode == 1) { // Paused
-			chapterLabel = this.makeLabel(3090, getString(R.string.searchmore) + "....", Gravity.CENTER, 18, headColor);
-//			positionLabel 	= this.makeLabel(3091, String.format("%d/%d",sr.pageIndex+1,sr.numberOfPagesInChapter), Gravity.LEFT, 15, headColor);
-			textLabel = this.makeLabel(3092, sr.numberOfSearched + " " + getString(R.string.searchfound) + ".", Gravity.CENTER, 16, textColor);
-			itemButton.setId(3093);
+			chapterLabel = this.makeLabel(R.id.make_resultItem_chapterLabel, getString(R.string.searchmore) + "....", Gravity.CENTER, 18, headColor);
+			textLabel = this.makeLabel(R.id.make_resultItem_textLabel, sr.numberOfSearched + " " + getString(R.string.searchfound) + ".", Gravity.CENTER, 16, textColor);
+			itemButton.setId(R.id.make_resultItem_btn_more);
 		} else if (mode == 2) { // finished
-			chapterLabel = this.makeLabel(3090, getString(R.string.searchfinished), Gravity.CENTER, 18, headColor);
-//			positionLabel 	= this.makeLabel(3091, String.format("%d/%d",sr.pageIndex+1,sr.numberOfPagesInChapter), Gravity.LEFT, 15, headColor);
-			textLabel = this.makeLabel(3092, sr.numberOfSearched + " " + getString(R.string.searchfound) + ".", Gravity.CENTER, 16, textColor);
-			itemButton.setId(3094);
+			chapterLabel = this.makeLabel(R.id.make_resultItem_chapterLabel, getString(R.string.searchfinished), Gravity.CENTER, 18, headColor);
+			textLabel = this.makeLabel(R.id.make_resultItem_textLabel, sr.numberOfSearched + " " + getString(R.string.searchfound) + ".", Gravity.CENTER, 16, textColor);
+			itemButton.setId(R.id.make_resultItem_btn_finish);
 		}
 
 		textLabel.setMaxLines(3);
@@ -2171,7 +2151,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		// making bright slider
 		brightBar = new SeekBar(this);
 		brightBar.setMax(999);
-		brightBar.setId(997);
+		brightBar.setId(R.id.font_box_brightBar);
 		brightBar.setBackgroundColor(Color.TRANSPARENT);
         brightBar.setOnSeekBarChangeListener(new SeekBarDelegate());
         brightBar.setProgressDrawable(new LineDrawable(Color.rgb(160, 160, 160), ps(10)));
@@ -2188,20 +2168,20 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		decreaseButton.setText(getString(R.string.chara));
 		decreaseButton.setGravity(Gravity.CENTER);
 		decreaseButton.setTextSize(14);
-		decreaseButton.setId(5000);
+		decreaseButton.setId(R.id.font_box_decreaseBtn);
 		RoundRectShape drs = new RoundRectShape(new float[]{ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5)}, null, null);
 		SkyDrawable drd = new SkyDrawable(drs, innerBoxColor, inlineColor, 1);
 		decreaseButton.setBackgroundDrawable(drd);
 		decreaseButton.setOnClickListener(listener);
 		decreaseButton.setOnTouchListener(new ButtonHighlighterOnTouchListener(decreaseButton));
 		contentLayout.addView(decreaseButton);
-		// inccrease font size Button
+		// increase font size Button
 		increaseButton = new Button(this);
 		setFrame(increaseButton, ps(10 + width / 2), ps(FBY), ps(width - 40 - 20) / 2, ps(60));
 		increaseButton.setText(getString(R.string.chara));
 		increaseButton.setTextSize(18);
 		increaseButton.setGravity(Gravity.CENTER);
-		increaseButton.setId(5001);
+		increaseButton.setId(R.id.font_box_increaseBtn);
 		RoundRectShape irs = new RoundRectShape(new float[]{ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5)}, null, null);
 		SkyDrawable ird = new SkyDrawable(irs, innerBoxColor, inlineColor, 1);
 		increaseButton.setBackgroundDrawable(ird);
@@ -2214,7 +2194,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		// deccrease line space Button
 		decreaseLineSpaceButton = this.makeImageButton(9005, R.drawable.decline2x, ps(30), ps(30));
 		setFrame(decreaseLineSpaceButton, ps(20), ps(LBY), ps(width - 40 - 20) / 2, ps(60));
-		decreaseLineSpaceButton.setId(4000);
+		decreaseLineSpaceButton.setId(R.id.font_box_decreaseLineSpaceBtn);
 		drs = new RoundRectShape(new float[]{ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5)}, null, null);
 		drd = new SkyDrawable(drs, innerBoxColor, inlineColor, 1);
 		decreaseLineSpaceButton.setBackgroundDrawable(drd);
@@ -2224,7 +2204,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		// inccrease line space Button
 		increaseLineSpaceButton = this.makeImageButton(9005, R.drawable.incline2x, ps(30), ps(30));
 		setFrame(increaseLineSpaceButton, ps(10 + width / 2), ps(LBY), ps(width - 40 - 20) / 2, ps(60));
-		increaseLineSpaceButton.setId(4001);
+		increaseLineSpaceButton.setId(R.id.font_box_increaseLineSpaceBtn);
 		irs = new RoundRectShape(new float[]{ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5), ps(5)}, null, null);
 		ird = new SkyDrawable(irs, innerBoxColor, inlineColor, 1);
 		increaseLineSpaceButton.setBackgroundDrawable(ird);
@@ -2394,26 +2374,26 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		listBox.setBackgroundColor(Color.TRANSPARENT);
 //		listBox.setBackgroundColor(this.themes.get(this.themeIndex).backgroundColor | 0xD0000000);
 		listTopButton = new Button(this);
-		listTopButton.setId(9009);
+		listTopButton.setId(R.id.make_listBox_listTopBtn);
 		listTopButton.setOnClickListener(listener);
 		listTopButton.setBackgroundColor(Color.TRANSPARENT);
 
 		GradientDrawable gradForChecked = new GradientDrawable(Orientation.TOP_BOTTOM, new int[]{0xff407ee6, 0xff6ca2f9});
 		GradientDrawable grad = new GradientDrawable(Orientation.TOP_BOTTOM, new int[]{0xfff4f4f4, 0xffcdcdcd});
 		this.contentListButton = new Button(this);
-		this.contentListButton.setId(2700);
+		this.contentListButton.setId(R.id.make_listBox_contentListBtn);
 		this.contentListButton.setOnClickListener(listener);
 		this.contentListButton.setText(getString(R.string.contents));
 		this.contentListButton.setTextSize(13);
 
 		this.bookmarkListButton = new Button(this);
-		this.bookmarkListButton.setId(2701);
+		this.bookmarkListButton.setId(R.id.make_listBox_bookmarkListBtn);
 		this.bookmarkListButton.setOnClickListener(listener);
 		this.bookmarkListButton.setText(getString(R.string.bookmark));
 		this.bookmarkListButton.setTextSize(13);
 
 		this.highlightListButton = new Button(this);
-		this.highlightListButton.setId(2702);
+		this.highlightListButton.setId(R.id.make_listBox_highlightListBtn);
 		this.highlightListButton.setOnClickListener(listener);
 		this.highlightListButton.setText(getString(R.string.highlight));
 		this.highlightListButton.setTextSize(13);
@@ -2428,7 +2408,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		this.listBox.addView(highlightListButton);
 
 		this.listBox.addView(listScrollView);
-		this.listScrollView.addView(listView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		this.listScrollView.addView(listView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 		this.ePubView.addView(this.listBox);
 		this.hideListBox();
@@ -2874,19 +2854,19 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		int sb = 25;
 		prevButton = this.makeImageButton(9898, R.drawable.prev2x, bs, bs);
 		setLocation(prevButton, ps(10), ps(5));
-		prevButton.setId(8080);
+		prevButton.setId(R.id.make_MediaBox_prevBtn);
 		prevButton.setOnClickListener(listener);
 		playAndPauseButton = this.makeImageButton(9898, R.drawable.pause2x, bs, bs);
 		setLocation(playAndPauseButton, ps(sb) + bs + ps(10), ps(5));
-		playAndPauseButton.setId(8081);
+		playAndPauseButton.setId(R.id.make_MediaBox_playOrPauseBtn);
 		playAndPauseButton.setOnClickListener(listener);
 		stopButton = this.makeImageButton(9898, R.drawable.stop2x, bs, bs);
 		setLocation(stopButton, (ps(sb) + bs) * 2, ps(5));
-		stopButton.setId(8082);
+		stopButton.setId(R.id.make_MediaBox_stopBtn);
 		stopButton.setOnClickListener(listener);
 		nextButton = this.makeImageButton(9898, R.drawable.next2x, bs, bs);
 		setLocation(nextButton, (ps(sb) + bs) * 3, ps(5));
-		nextButton.setId(8083);
+		nextButton.setId(R.id.make_MediaBox_nextBtn);
 		nextButton.setOnClickListener(listener);
 
 		mediaBox.setVisibility(View.INVISIBLE);
@@ -3111,11 +3091,11 @@ public class MyBookViewActivity extends Activity implements IBookView {
 
 		int bs = 38;
 		if (this.isRotationLocked)
-			rotationButton = this.makeImageButton(9000, R.drawable.rotationlocked2x, ps(42), ps(42));
-		else rotationButton = this.makeImageButton(9000, R.drawable.rotation2x, ps(42), ps(42));
-		listButton = this.makeImageButton(9001, R.drawable.list2x, getPS(bs), getPS(bs));
-		fontButton = this.makeImageButton(9002, R.drawable.font2x, getPS(bs), getPS(bs));
-		searchButton = this.makeImageButton(9003, R.drawable.search2x, getPS(bs), getPS(bs));
+			rotationButton = this.makeImageButton(R.id.make_controls_rotationBtn, R.drawable.rotationlocked2x, ps(42), ps(42));
+		else rotationButton = this.makeImageButton(R.id.make_controls_rotationBtn, R.drawable.rotation2x, ps(42), ps(42));
+		listButton = this.makeImageButton(R.id.make_controls_listBtn, R.drawable.list2x, getPS(bs), getPS(bs));
+		fontButton = this.makeImageButton(R.id.make_controls_fontBtn, R.drawable.font2x, getPS(bs), getPS(bs));
+		searchButton = this.makeImageButton(R.id.make_controls_searchBtn, R.drawable.search2x, getPS(bs), getPS(bs));
 		rotationButton.setOnTouchListener(new ImageButtonHighlighterOnTouchListener(rotationButton));
 		listButton.setOnTouchListener(new ImageButtonHighlighterOnTouchListener(listButton));
 		fontButton.setOnTouchListener(new ImageButtonHighlighterOnTouchListener(fontButton));
@@ -3145,7 +3125,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 
 		seekBar = new SkySeekBar(this);
 		seekBar.setMax(999);
-		seekBar.setId(999);
+		seekBar.setId(R.id.make_controls_seekBar);
 		RectShape rectShape = new RectShape();
 		ShapeDrawable thumb = new ShapeDrawable(rectShape);
 
@@ -3770,86 +3750,80 @@ public class MyBookViewActivity extends Activity implements IBookView {
 
 	private OnClickListener listener = new OnClickListener() {
 		public void onClick(View arg) {
-            Log.d("xns", "onClickId:" + arg.getId());
-            Log.d("xns", "myId:" + highlightBox.contentView.getChildAt(0).getId());
-            for (int i=0;i<ePubView.getChildCount();i++) {
-                Log.d("xns", "view:" + ePubView.getChildAt(i));
-            }
-            if (arg.getId() == 8080) {
+            if (arg.getId() == R.id.make_MediaBox_prevBtn) {
 				playPrev();
-			} else if (arg.getId() == 8081) {
+			} else if (arg.getId() == R.id.make_MediaBox_playOrPauseBtn) {
 				playAndPause();
-			} else if (arg.getId() == 8082) {
+			} else if (arg.getId() == R.id.make_MediaBox_stopBtn) {
 				stopPlaying();
-			} else if (arg.getId() == 8083) {
+			} else if (arg.getId() == R.id.make_MediaBox_nextBtn) {
 				playNext();
 			} else if (arg.getId() == 8084) {
 				finish();
 			}
 
-			if (arg.getId() == 3001) {
+			if (arg.getId() == R.id.search_box_cancelBtn) {
 				cancelPressed();
-			} else if (arg.getId() == 3093) {
+			} else if (arg.getId() == R.id.make_resultItem_btn_more) {
 				// search More
 				removeLastResult();
 //				showToast("Search More...");
 				rv.searchMore();
-			} else if (arg.getId() == 3094) {
+			} else if (arg.getId() == R.id.make_resultItem_btn_finish) {
 				removeLastResult();
 				hideSearchBox();
 				// stopSearch
 			}
 
-			if (arg.getId() == 9000) {        // homePressed
+			if (arg.getId() == R.id.make_controls_rotationBtn) {        // homePressed
 				rotationPressed();
-			} else if (arg.getId() == 9001 || arg.getId() == 9009) {    // listPressed
+			} else if (arg.getId() == R.id.make_controls_listBtn || arg.getId() == R.id.make_listBox_listTopBtn) {    // listPressed
 				listPressed();
-			} else if (arg.getId() == 9002) {    // fontPressed
+			} else if (arg.getId() == R.id.make_controls_fontBtn) {    // fontPressed
 				fontPressed();
-			} else if (arg.getId() == 9003) {    // searchPressed
+			} else if (arg.getId() == R.id.make_controls_searchBtn) {    // searchPressed
 				searchPressed();
 			}
 
-			if (arg.getId() == 6000) {
+			if (arg.getId() == R.id.highlight_menu_highlight) {
 				// highlightMenuButton
 				mark();
 				hideMenuBox();
 				showHighlightBox();
-			} else if (arg.getId() == 6001) {
+			} else if (arg.getId() == R.id.highlight_menu_note) {
 				mark();
 				hideMenuBox();
 				if (!rv.isPaging()) showNoteBox();
 			}
 
 			if (arg.getId() == R.id.highlight_box_color) {
-                Log.d("xns", "color");
                 // Color Chooser
 				hideHighlightBox();
 				showColorBox();
-			} else if (arg.getId() == 6003) {
+			} else if (arg.getId() == R.id.highlight_box_trash) {
 				hideHighlightBox();
 				rv.deleteHighlight(currentHighlight);
-			} else if (arg.getId() == 6004) {
+			} else if (arg.getId() == R.id.highlight_box_note) {
 				hideHighlightBox();
 				if (!rv.isPaging()) showNoteBox();
 			}
 
 			int color;
-			if (arg.getId() == 6010) {
+			if (arg.getId() == R.id.make_colorBox_yellowBtn) {
 				color = getColorByIndex(0);
 				changeHighlightColor(currentHighlight, color);
-			} else if (arg.getId() == 6011) {
+			} else if (arg.getId() == R.id.make_colorBox_greenBtn) {
 				color = getColorByIndex(1);
 				changeHighlightColor(currentHighlight, color);
-			} else if (arg.getId() == 6012) {
+			} else if (arg.getId() == R.id.make_colorBox_blueBtn) {
 				color = getColorByIndex(2);
 				changeHighlightColor(currentHighlight, color);
-			} else if (arg.getId() == 6013) {
+			} else if (arg.getId() == R.id.make_colorBox_redBtn) {
 				color = getColorByIndex(3);
 				changeHighlightColor(currentHighlight, color);
 			}
 
-			if (arg.getId() == 9999) {
+			if (arg.getId() == R.id.btn_outside) {
 				hideOutsideButton();
 				hideBoxes();
 			}
@@ -3865,10 +3839,10 @@ public class MyBookViewActivity extends Activity implements IBookView {
 			}
 
 			// fonts related
-			if (arg.getId() == 5000) {
+			if (arg.getId() == R.id.font_box_decreaseBtn) {
 				// decrease button
 				decreaseFont();
-			} else if (arg.getId() == 5001) {
+			} else if (arg.getId() == R.id.font_box_increaseBtn) {
 				// increase button
 				increaseFont();
 			} else if (arg.getId() >= 5100 && arg.getId() < 5500) {
@@ -3877,10 +3851,10 @@ public class MyBookViewActivity extends Activity implements IBookView {
 			}
 
 			// line space
-			if (arg.getId() == 4000) {
+			if (arg.getId() == R.id.font_box_decreaseLineSpaceBtn) {
 				// decrease button
 				decreaseLineSpace();
-			} else if (arg.getId() == 4001) {
+			} else if (arg.getId() == R.id.font_box_increaseLineSpaceBtn) {
 				// increase button
 				increaseLineSpace();
 			}
@@ -3895,11 +3869,11 @@ public class MyBookViewActivity extends Activity implements IBookView {
 			}
 
 			// list processing
-			if (arg.getId() == 2700) {
+			if (arg.getId() == R.id.make_listBox_contentListBtn) {
 				checkListButton(0);
-			} else if (arg.getId() == 2701) {
+			} else if (arg.getId() == R.id.make_listBox_bookmarkListBtn) {
 				checkListButton(1);
-			} else if (arg.getId() == 2702) {
+			} else if (arg.getId() == R.id.make_listBox_highlightListBtn) {
 				checkListButton(2);
 			}
 
