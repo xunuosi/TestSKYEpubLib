@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.skytree.epub.BookInformation;
 
+import xunuosi.github.io.testskyepublib.widget.IndicatorProgressBar;
 import xunuosi.github.io.testskyepublib.widget.SkyPieView;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     final String RELOAD_ACTION = "com.skytree.android.intent.action.RELOAD";
 
     private Button mBtnLoad, mBtnRead, mBtnLoadInternet;
-    private ProgressBar mProgressBar;
+    private IndicatorProgressBar mProgressBar;
     private LocalService ls = null;
     boolean isBound = false;
     MyApplication app;
@@ -92,8 +95,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mProgressBar = (ProgressBar) findViewById(R.id.pb);
+        mProgressBar = (IndicatorProgressBar) findViewById(R.id.pb);
         mProgressBar.setMax(100);
+
+        Drawable indicator = getResources().getDrawable(
+                R.drawable.progress_indicator);
+        Rect bounds = new Rect(0, 0, indicator.getIntrinsicWidth() + 5,
+                indicator.getIntrinsicHeight());
+        indicator.setBounds(bounds);
+
+        mProgressBar.setProgressIndicator(indicator);
+        mProgressBar.setProgress(0);
+        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     private void LoadInternetBook() {
