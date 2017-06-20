@@ -457,7 +457,6 @@ LocalService extends Service {
         intent.putExtra("BYTES_DONWLOADED", bytes_downloaded);
         intent.putExtra("BYTES_TOTAL", bytes_total);
         intent.putExtra("PERCENT", percent);
-
 //		debug("Sender   BookCode:"+bookCode+" "+percent);
         this.sendBroadcast(intent);
     }

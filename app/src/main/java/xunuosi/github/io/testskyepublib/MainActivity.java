@@ -13,9 +13,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.skytree.epub.BookInformation;
+
+import xunuosi.github.io.testskyepublib.widget.SkyPieView;
 
 public class MainActivity extends AppCompatActivity {
     final String RELOADBOOK_ACTION = "com.skytree.android.intent.action.RELOADBOOK";
@@ -23,10 +29,11 @@ public class MainActivity extends AppCompatActivity {
     final String RELOAD_ACTION = "com.skytree.android.intent.action.RELOAD";
 
     private Button mBtnLoad, mBtnRead, mBtnLoadInternet;
+    private ProgressBar mProgressBar;
     private LocalService ls = null;
     boolean isBound = false;
     MyApplication app;
-    SkyReceiver mSkyReceiver;
+    SkyReceiver reloadReceiver, progressReceiver, reloadBookReceiver;
     SkyUtility  st;
     private BookInformation lastBook = null;
 
@@ -84,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
                 LoadInternetBook();
             }
         });
+
+        mProgressBar = (ProgressBar) findViewById(R.id.pb);
+        mProgressBar.setMax(100);
     }
 
     private void LoadInternetBook() {
@@ -126,17 +136,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mSkyReceiver = new SkyReceiver();
-        IntentFilter intentFilter = new IntentFilter(RELOADBOOK_ACTION);
-        registerReceiver(mSkyReceiver, intentFilter);
+        IntentFilter filter0 = new IntentFilter(RELOAD_ACTION);
+        reloadReceiver = new SkyReceiver();
+        registerReceiver(reloadReceiver, filter0);
+        IntentFilter filter1 = new IntentFilter(PROGRESS_ACTION);
+        progressReceiver = new SkyReceiver();
+        registerReceiver(progressReceiver, filter1);
+        IntentFilter filter2 = new IntentFilter(RELOADBOOK_ACTION);
+        reloadBookReceiver = new SkyReceiver();
+        registerReceiver(reloadBookReceiver, filter2);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mSkyReceiver != null) {
-            unregisterReceiver(mSkyReceiver);
-        }
+        if(reloadReceiver != null) this.unregisterReceiver(reloadReceiver);
+        if(progressReceiver != null) this.unregisterReceiver(progressReceiver);
+        if(reloadBookReceiver != null) this.unregisterReceiver(reloadBookReceiver);
     }
 
     private void installBookFromAssets() {
@@ -181,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                         int bytes_downloaded = msg.getData().getInt("BYTES_DOWNLOADED");
                         int bytes_total = msg.getData().getInt("BYTES_TOTAL");
                         double percent = msg.getData().getDouble("PERCENT");
-//                        refreshPieView(bookCode,percent);
+                        refreshProgress(bookCode,percent);
                     }
                 }.sendMessage(msg);
             }else if  (intent.getAction().equals(RELOAD_ACTION)) {
@@ -194,9 +210,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void refreshProgress(int bookCode, double percent) {
+        mProgressBar.setProgress((int) percent * 100);
+    }
+
+
     public void reload() {
         app.reloadBookInformations();
-        mBtnRead.setEnabled(true);
+        Toast.makeText(MainActivity.this, "载入本地图书完成", Toast.LENGTH_SHORT).show();
     }
 
     public void reload(int bookCode) {

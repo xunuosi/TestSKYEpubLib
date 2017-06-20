@@ -1450,7 +1450,6 @@ public class MyBookViewActivity extends Activity implements IBookView {
 
 	public void makeOutsideButton() {
 		outsideButton = new Button(this);
-        Log.e("xns", "outBtn:" + outsideButton.toString());
         outsideButton.setId(R.id.btn_outside);
 		outsideButton.setBackgroundColor(Color.TRANSPARENT);
         outsideButton.setOnClickListener(listener);
