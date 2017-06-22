@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     final String PROGRESS_ACTION = "com.skytree.android.intent.action.PROGRESS";
     final String RELOAD_ACTION = "com.skytree.android.intent.action.RELOAD";
 
-    private Button mBtnLoad, mBtnRead, mBtnLoadInternet;
+    private Button mBtnLoad, mBtnRead, mBtnLoadInternet, mBtnTest;
     private IndicatorProgressBar mProgressBar;
     private LocalService ls = null;
     boolean isBound = false;
@@ -39,6 +39,13 @@ public class MainActivity extends AppCompatActivity {
     SkyReceiver reloadReceiver, progressReceiver, reloadBookReceiver;
     SkyUtility  st;
     private BookInformation lastBook = null;
+    private Handler testHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle data = msg.getData();
+            refreshProgress(data.getDouble("PERCENT"));
+        }
+    };
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -107,6 +114,37 @@ public class MainActivity extends AppCompatActivity {
         mProgressBar.setProgressIndicator(indicator);
         mProgressBar.setProgress(0);
         mProgressBar.setVisibility(View.VISIBLE);
+
+        mBtnTest = (Button) findViewById(R.id.btn_test);
+        mBtnTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testProgressBar();
+            }
+        });
+    }
+
+    private void testProgressBar() {
+        new Thread() {
+            @Override
+            public void run() {
+                Bundle b = new Bundle();
+                for (int i=1;i<=100;i++) {
+                    Message msg = Message.obtain();
+                    b.putInt("BOOKCODE", 1);
+                    b.putInt("BYTES_DOWNLOADED", 1);
+                    b.putInt("BYTES_TOTAL", 1);
+                    b.putDouble("PERCENT", i);
+                    msg.setData(b);
+                    testHandler.sendMessage(msg);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+       }.start();
     }
 
     private void LoadInternetBook() {
@@ -226,6 +264,11 @@ public class MainActivity extends AppCompatActivity {
     private void refreshProgress(int bookCode, double percent) {
         mProgressBar.setProgress((int) percent * 100);
     }
+
+    private void refreshProgress(double percent) {
+        mProgressBar.setProgress((int) percent);
+    }
+
 
 
     public void reload() {
