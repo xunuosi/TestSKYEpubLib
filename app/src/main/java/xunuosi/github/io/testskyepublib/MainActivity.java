@@ -8,9 +8,12 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -88,9 +91,7 @@ public class MainActivity extends AppCompatActivity {
         mBtnRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BookInformation bi = app.bis.get(0);
-                lastBook = bi;
-                openBookViewer(bi);
+                checkoutPermission();
             }
         });
 
@@ -122,6 +123,34 @@ public class MainActivity extends AppCompatActivity {
                 testProgressBar();
             }
         });
+    }
+
+    private void checkoutPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Settings.System.canWrite(MainActivity.this)) {
+                BookInformation bi = app.bis.get(0);
+                lastBook = bi;
+                openBookViewer(bi);
+            } else {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 0);
+            }
+        } else {
+            BookInformation bi = app.bis.get(0);
+            lastBook = bi;
+            openBookViewer(bi);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0 && Settings.System.canWrite(MainActivity.this)) {
+            BookInformation bi = app.bis.get(0);
+            lastBook = bi;
+            openBookViewer(bi);
+        }
     }
 
     private void testProgressBar() {
@@ -273,7 +302,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void reload() {
         app.reloadBookInformations();
-        Toast.makeText(MainActivity.this, "载入本地图书完成", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "初始化完成", Toast.LENGTH_SHORT).show();
+        mBtnRead.setEnabled(true);
     }
 
     public void reload(int bookCode) {

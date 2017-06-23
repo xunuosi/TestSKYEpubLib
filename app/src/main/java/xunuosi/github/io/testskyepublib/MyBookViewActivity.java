@@ -67,6 +67,7 @@ import com.skytree.epub.Book;
 import com.skytree.epub.BookmarkListener;
 import com.skytree.epub.Caret;
 import com.skytree.epub.ClickListener;
+import com.skytree.epub.ContentData;
 import com.skytree.epub.Highlight;
 import com.skytree.epub.HighlightListener;
 import com.skytree.epub.Highlights;
@@ -113,6 +114,8 @@ public class MyBookViewActivity extends Activity implements IBookView {
 	ImageButton searchButton;
 	Rect bookmarkRect;
 	Rect bookmarkedRect;
+
+    SkyProvider skyProvider;
 
 	boolean isRotationLocked;
 
@@ -1205,7 +1208,7 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		// SkyProvider is the default ContentProvider which is presented with SDK.
 		// SkyProvider can read the content of epub file without unzipping.
 		// SkyProvider is also fully integrated with SkyDRM solution.
-		SkyProvider skyProvider = new SkyProvider();
+		skyProvider = new SkyProvider();
 		skyProvider.setKeyListener(new KeyDelegate());
 		rv.setContentProvider(skyProvider);
 
@@ -1315,9 +1318,11 @@ public class MyBookViewActivity extends Activity implements IBookView {
 		if (this.isRTL) {
 			this.seekBar.setReversed(true);
 		}
-		setContentView(ePubView);
-		this.isInitialized = true;
-	}
+
+        setContentView(ePubView);
+        this.isInitialized = true;
+//        Log.d("xns", "path:" + path);
+    }
 
 	// if the current theme should be changed while book is opened,
 	// use this function.
